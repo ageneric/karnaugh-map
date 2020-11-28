@@ -18,7 +18,7 @@ public class Main : MonoBehaviour
             gridState = new bool[grid_size];
             Debug.Log("Initialised main data.");
         }
-        else { 
+        else {
             Debug.Log("Second call to create multiple [Main] instances.");
         }
     }

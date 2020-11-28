@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2427258887258394211}
   - component: {fileID: 2427258887258394210}
   m_Layer: 5
-  m_Name: Label
+  m_Name: CustomLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -157,7 +157,7 @@ MonoBehaviour:
   m_Interactable: 1
   m_TargetGraphic: {fileID: 2427258888630826237}
   toggleTransition: 1
-  graphic: {fileID: 2427258887258394210}
+  graphic: {fileID: 0}
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
@@ -187,6 +187,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   index: 0
+  offset: {fileID: 0}
+  positionScale: 80
+  label: {fileID: 2427258887258394210}
 --- !u!1 &2427258888630826239
 GameObject:
   m_ObjectHideFlags: 0

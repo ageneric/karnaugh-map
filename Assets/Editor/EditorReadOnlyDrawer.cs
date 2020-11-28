@@ -4,8 +4,8 @@ using UnityEditor;
 // Create a read-only field in the Unity Inspector. Source:
 // https://answers.unity.com/questions/489942/how-to-make-a-readonly-property-in-inspector.html
 
-[CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
-public class ReadOnlyDrawer : PropertyDrawer {
+[CustomPropertyDrawer(typeof(EditorReadOnlyAttribute))]
+public class EditorReadOnlyDrawer : PropertyDrawer {
     public override float GetPropertyHeight(SerializedProperty property,
                                             GUIContent label) {
         return EditorGUI.GetPropertyHeight(property, label, true);
