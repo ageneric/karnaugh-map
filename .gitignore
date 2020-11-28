@@ -60,3 +60,8 @@ crashlytics-build.properties
 
 # Unity build templates
 /[Aa]ssets/WebGLTemplates
+/[Aa]ssets/WebGLTemplates.meta
+
+# Default for this project
+Packages/
+ProjectSettings/
