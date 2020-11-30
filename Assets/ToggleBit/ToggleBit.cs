@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class ToggleBit : MonoBehaviour
 {
+    // Represents a single binary bit in the k-map's grid state.
+
     [EditorReadOnly] public int index;
     [EditorReadOnly] public Transform offset;
     public float positionScale;
@@ -14,8 +16,8 @@ public class ToggleBit : MonoBehaviour
         UpdateDisplay();
     }
 
-    public void Reset(bool isOn) {
-        gameObject.GetComponent<Toggle>().isOn = isOn;
+    public void Reset() {
+        gameObject.GetComponent<Toggle>().SetIsOnWithoutNotify(Main.Instance.gridState[index]);
         UpdateDisplay();
     }
 

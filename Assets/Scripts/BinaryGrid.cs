@@ -20,11 +20,6 @@ public class BinaryGrid : MonoBehaviour
         ResetGrid(Main.Instance.inputLength);
     }
 
-    public int GridLength {
-        // Get the expected length of the grid array.
-        get => gridWidth * gridHeight;
-    }
-
     public void StartInitialiseGrid() {
         Vector3 zeroPosition = new Vector3(0, 0, 0);
 
@@ -42,6 +37,8 @@ public class BinaryGrid : MonoBehaviour
     }
 
     public void ResetGrid(int inputLength) {
+        Main.Instance.UpdateInputLength(inputLength);
+
         switch (inputLength) {
             case 2:
                 gridWidth = 2; gridHeight = 2; break;
@@ -58,9 +55,10 @@ public class BinaryGrid : MonoBehaviour
         gridToggleButtons = new List<GameObject>();
         foreach (GameObject toggleButton in poolToggleButtons) {
             ToggleBit toggleBit = toggleButton.GetComponent<ToggleBit>();
-            if (toggleBit.index < GridLength) {
+
+            if (toggleBit.index < Main.Instance.GridSize) {
                 toggleButton.SetActive(true);
-                toggleBit.Reset(Main.Instance.gridState[toggleBit.index]);
+                toggleBit.Reset();
                 toggleBit.PositionInGrid(gridWidth);
                 gridToggleButtons.Add(toggleButton);
             }
