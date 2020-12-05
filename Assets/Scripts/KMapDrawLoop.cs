@@ -6,7 +6,7 @@ using KMapLoop = System.Collections.Generic.List<System.Collections.Generic.List
 public class KMapDrawLoop : MonoBehaviour
 {
     public void SeedLoopPositionZero() {
-        KMapSimplify.SeedLoop(0);
+        Main.Instance.loops.Add(KMapSimplify.SeedLoop(0));
     }
 
     public void LogLoops() {
@@ -15,11 +15,11 @@ public class KMapDrawLoop : MonoBehaviour
         foreach (KMapLoop loop in Main.Instance.loops) {
 
             List<string> loopStrings = new List<string>();
-            foreach (List<bool> combination in loop) {
+            foreach (List<bool> logicIncludeList in loop) {
 
                 string representation;
-                if (combination.Count == 1) {
-                    if (combination[0] == true)
+                if (logicIncludeList.Count == 1) {
+                    if (logicIncludeList[0] == true)
                         representation = "1";
                     else
                         representation = "0";

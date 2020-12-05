@@ -443,6 +443,7 @@ GameObject:
   - component: {fileID: 721135691}
   - component: {fileID: 721135693}
   - component: {fileID: 721135692}
+  - component: {fileID: 721135694}
   m_Layer: 5
   m_Name: Loop
   m_TagString: Untagged
@@ -506,6 +507,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 721135690}
   m_CullTransparentMesh: 0
+--- !u!114 &721135694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 721135690}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f79214ae73f47234ba4c0d440625c148, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &953874701
 GameObject:
   m_ObjectHideFlags: 0
@@ -702,7 +715,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1384499904}
-        m_MethodName: SeedLoopPositionZero
+        m_MethodName: CallSolveKMap
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1001,8 +1014,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a53638b88dbe914285d1b329dfc6cfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridStateSet: 01
-  gridStateUnset: 00
 --- !u!222 &1384499905
 CanvasRenderer:
   m_ObjectHideFlags: 0
