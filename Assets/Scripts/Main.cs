@@ -37,4 +37,9 @@ public class Main : MonoBehaviour
         gridState = new bool[GridSize];
         loops = new List<KMapLoop>();
     }
+
+    public void OnChangeInput() {
+        if (loops.Count > 0)
+            loops = new List<KMapLoop>();
+    }
 }

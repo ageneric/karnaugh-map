@@ -34,7 +34,7 @@ public static class BinaryHelper
         List<bool> bits = new List<bool>();
 
         for (int i = 0; i < length; i++) {
-            bits.Insert(0, value % 2 != 0);
+            bits.Add(value % 2 != 0);
             value >>= 1;
         }
         bits.Reverse();
@@ -47,8 +47,9 @@ public static class BinaryHelper
 
     public static int BooleanToBinaryValue(bool[] bits) {
         int totalBinary = 0;
-
-        for (int i = bits.Length - 1; i >= 0; i--) {
+        Array.Reverse(bits);
+        
+        for (int i = 0; i < bits.Length; i++) {
             if (bits[i])
                 totalBinary += PowBaseTwo(i);
         }

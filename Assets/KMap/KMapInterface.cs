@@ -5,12 +5,42 @@ using KMapLoop = System.Collections.Generic.List<System.Collections.Generic.List
 
 public class KMapInterface : MonoBehaviour
 {
+    public GameObject KMapLoopSprite;
+    public List<GameObject> drawnLoops = new List<GameObject>();
+    public GameObject overlayGroup;
+    public Transform overlayStartOffset;
+
+    public GameObject grid;
+    BinaryGrid binaryGrid;
+
+    private void Start() {
+        binaryGrid = grid.GetComponent<BinaryGrid>();
+    }
+
     public void SeedLoopPositionZero() {
         Main.Instance.loops.Add(KMapSimplify.SeedLoop(0));
     }
 
     public void SolveKMap() {
+        Main.Instance.OnChangeInput();
         KMapSimplify.Solve();
+        ResetLoopSprites();
+
+        foreach (KMapLoop loop in Main.Instance.loops) {
+            GameObject loopSprite = Instantiate(KMapLoopSprite, Vector3.zero, Quaternion.identity,
+                overlayGroup.transform);
+            LoopAroundSprite loopSpritePlacement = loopSprite.GetComponent<LoopAroundSprite>();
+            loopSpritePlacement.loop = loop;
+            loopSpritePlacement.offset = overlayStartOffset;
+            loopSpritePlacement.PositionInOverlay();
+            drawnLoops.Add(loopSprite);
+        }
+    }
+
+    public void ResetLoopSprites() {
+        foreach (GameObject loop in drawnLoops) {
+            Destroy(loop);
+        }
     }
 
     public void LogLoops() {

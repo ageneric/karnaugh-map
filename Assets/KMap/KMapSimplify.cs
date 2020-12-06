@@ -21,7 +21,7 @@ public static class KMapSimplify
     }
 
     public static KMapLoop SeedLoop(int startIndex) {
-        // Create a 1x1 loop containing the index (which should represent a true truth-table bit).
+        // Create a size-1 loop containing the index (which should represent an enabled truth-table bit).
         KMapLoop loop = new KMapLoop();
 
         foreach (bool bit in BinaryHelper.BinaryValueToBoolean(startIndex, Main.Instance.inputLength)) {
@@ -33,22 +33,33 @@ public static class KMapSimplify
     public static void ExpandLoop(KMapLoop startLoop, int minimumIndex) {
         List<KMapLoop> currentLoops = new List<KMapLoop>();
         bool isMaximum = true;
+        Debug.Log("Start about: " + startLoop.ToPresentableString());
 
         // For each flippable bit (neighbouring tile).
         for (int flipBit = 0; flipBit < Main.Instance.inputLength; flipBit++) {
-            if (startLoop[flipBit].Count == 2) 
+            if (startLoop[flipBit].Count == 2) {
                 continue;
-
+            }
             // Create the neighbouring loop.
             KMapLoop neighbour = AdjacentLoop(startLoop, flipBit);
             Debug.Log("Neighbour: " + neighbour.ToPresentableString());
 
-            // Unpack into tiles contained in the neighbouring loop.
-            List<int> neighbourTileList = UnpackLoop(neighbour);
+            // Unpack into all the tile indexes contained in the neighbouring loop.
+            List<int> neighbourTileList = new List<int>();
+            IEnumerable<IEnumerable<bool>> combinations = CrossProductCombinations(neighbour);
+
+            foreach (IEnumerable<bool> tileBitList in combinations) {
+                int gridIndex = BinaryHelper.BooleanToBinaryValue(tileBitList.ToArray());
+                neighbourTileList.Add(gridIndex);
+            }
             Debug.Log("Checking tiles: " + string.Join(", ", neighbourTileList));
 
+            // Avoid overlap with any previously maximised tiles.
+            if (neighbourTileList.Any(tileIndex => tileIndex < minimumIndex)) {
+                continue;
+            }
             // If all those tiles are set to 1, can merge together into larger loop.
-            if (neighbourTileList.All(tileIndex => Main.Instance.gridState[tileIndex])) {
+            else if (neighbourTileList.All(tileIndex => Main.Instance.gridState[tileIndex])) {
                 KMapLoop mergeLoop = MergeAdjacent(startLoop, neighbour);
                 Debug.Log("Merged: " + mergeLoop.ToPresentableString());
 
@@ -79,30 +90,11 @@ public static class KMapSimplify
         return adjacentLoop;
     }
 
-    public static List<int> UnpackLoop(KMapLoop loop) {
-        // Inefficient method to list all the tiles in any size loop.
-        List<int> tileList = new List<int>();
-        
-        for (int gridIndex = Main.Instance.GridSize - 1; gridIndex >= 0; gridIndex--) {
-            // Determine if the grid tile's binary index is contained within the tiles
-            // represented, which are found using the cross product of all combinations.
-            bool tileIsContained = true;
-            for (int bitChecked = 0; bitChecked < Main.Instance.inputLength; bitChecked++) {
-                if (!loop[bitChecked].Contains(BinaryHelper.BitIsSet(gridIndex, bitChecked))) {
-                    tileIsContained = false;
-                }
-            }
-            if (tileIsContained) {
-                tileList.Add(gridIndex);
-            }
-        }
-        return tileList;
-    }
-
     // Taken from https://ericlippert.com/2010/06/28/computing-a-cartesian-product-with-linq/.
-    // Will replace UnpackLoop() after testing.
+    // Computes the Cartesian / "cross" product of all logic values included within a loop.
+    // {{0}, {0, 1}} -> {{0, 0}, {0, 1}}
     public static IEnumerable<IEnumerable<bool>> CrossProductCombinations(IEnumerable<IEnumerable<bool>> sequences) {
-        // Base case {} - if no sequences are provided.
+        // Base case is {} - if no sequences are provided.
         IEnumerable<IEnumerable<bool>> defaultEmpty = new[] { Enumerable.Empty<bool>() };
         return sequences.Aggregate(
             defaultEmpty,
@@ -118,7 +110,7 @@ public static class KMapSimplify
         KMapLoop mergeLoop = new KMapLoop();
 
         // Merge each logic value from the loops in pairs.
-        for (int i = startLoop.Count - 1; i >= 0; i--) {
+        for (int i = 0; i < startLoop.Count; i++) {
             HashSet<bool> logicIncludeSet = new HashSet<bool>();
 
             for (int j = 0; j < startLoop[i].Count; j++) {

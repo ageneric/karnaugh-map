@@ -22,6 +22,8 @@ public class ToggleBit : MonoBehaviour
     }
 
     public void UpdateDisplay() {
+        Main.Instance.OnChangeInput();
+        FindObjectOfType<KMapInterface>().ResetLoopSprites();
         if (Main.Instance.gridState[index]) {
             label.text = index.ToString() + ":1";
         }
