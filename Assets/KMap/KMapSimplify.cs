@@ -15,6 +15,7 @@ public static class KMapSimplify
                 KMapLoop startLoop = SeedLoop(index);
 
                 // Expand the loop -> Adds loops to Main.Instance.loops;
+                ExpandLoop(startLoop, index);
             }
         }
     }
@@ -31,21 +32,58 @@ public static class KMapSimplify
 
     public static void ExpandLoop(KMapLoop startLoop, int minimumIndex) {
         List<KMapLoop> currentLoops = new List<KMapLoop>();
-        // For each flippable bit (neighbouring tile).
-            // Create the neighbouring loop.
-            // Unpack into tiles contained in the neighbouring loop.
-            // If all those tiles are set to 1, can merge together into larger loop.
+        bool isMaximum = true;
 
-        // If any loops were created remove the original loop.
-        // Append remaining loops to loop list.
-        Main.Instance.loops.AddRange(currentLoops);
+        // For each flippable bit (neighbouring tile).
+        for (int flipBit = 0; flipBit < Main.Instance.inputLength; flipBit++) {
+            if (startLoop[flipBit].Count == 2) 
+                continue;
+
+            // Create the neighbouring loop.
+            KMapLoop neighbour = AdjacentLoop(startLoop, flipBit);
+            Debug.Log("Neighbour: " + neighbour.ToPresentableString());
+
+            // Unpack into tiles contained in the neighbouring loop.
+            List<int> neighbourTileList = UnpackLoop(neighbour);
+            Debug.Log("Checking tiles: " + string.Join(", ", neighbourTileList));
+
+            // If all those tiles are set to 1, can merge together into larger loop.
+            if (neighbourTileList.All(tileIndex => Main.Instance.gridState[tileIndex])) {
+                KMapLoop mergeLoop = MergeAdjacent(startLoop, neighbour);
+                Debug.Log("Merged: " + mergeLoop.ToPresentableString());
+
+                currentLoops.Add(mergeLoop);
+                isMaximum = false;
+            }
+        }
+
+        // Append remaining to loop list (add original only if it can't be expanded).
+        if (isMaximum) {
+            Main.Instance.loops.Add(startLoop);
+        }
+        else {
+            Main.Instance.loops.AddRange(currentLoops);
+        }
+    }
+
+    public static KMapLoop AdjacentLoop(KMapLoop startLoop, int flipBit) {
+        KMapLoop adjacentLoop = new KMapLoop();
+
+        for (int copyBit = 0; copyBit < Main.Instance.inputLength; copyBit++) {
+            List<bool> adjacentCombination = new List<bool>(startLoop[copyBit]);
+            if (flipBit == copyBit) {
+                adjacentCombination[0] = !adjacentCombination[0];
+            }
+            adjacentLoop.Add(adjacentCombination);
+        }
+        return adjacentLoop;
     }
 
     public static List<int> UnpackLoop(KMapLoop loop) {
         // Inefficient method to list all the tiles in any size loop.
-        List<int> tileLists = new List<int>();
+        List<int> tileList = new List<int>();
         
-        for (int gridIndex = 0; gridIndex < Main.Instance.GridSize; gridIndex++) {
+        for (int gridIndex = Main.Instance.GridSize - 1; gridIndex >= 0; gridIndex--) {
             // Determine if the grid tile's binary index is contained within the tiles
             // represented, which are found using the cross product of all combinations.
             bool tileIsContained = true;
@@ -55,10 +93,10 @@ public static class KMapSimplify
                 }
             }
             if (tileIsContained) {
-                tileLists.Add(gridIndex);
+                tileList.Add(gridIndex);
             }
         }
-        return tileLists;
+        return tileList;
     }
 
     // Taken from https://ericlippert.com/2010/06/28/computing-a-cartesian-product-with-linq/.
@@ -73,5 +111,24 @@ public static class KMapSimplify
                 from includeValue in sequence
                 select combination.Concat(new[] { includeValue })
         );
+    }
+
+    public static KMapLoop MergeAdjacent(KMapLoop startLoop, KMapLoop neighbour) {
+        // {{0}, {0}} merge {{0}, {1}} -> {{0}, {0, 1}}
+        KMapLoop mergeLoop = new KMapLoop();
+
+        // Merge each logic value from the loops in pairs.
+        for (int i = startLoop.Count - 1; i >= 0; i--) {
+            HashSet<bool> logicIncludeSet = new HashSet<bool>();
+
+            for (int j = 0; j < startLoop[i].Count; j++) {
+                logicIncludeSet.Add(startLoop[i][j]);
+                logicIncludeSet.Add(neighbour[i][j]);
+            }
+            // HashSet used to eliminate duplicates if matching: {0} + {0} -> {0},
+            // but to keep both logic values if different: {0} + {1} -> {0, 1}.
+            mergeLoop.Add(logicIncludeSet.ToList());
+        }
+        return mergeLoop;
     }
 }
