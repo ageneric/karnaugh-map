@@ -31,16 +31,16 @@ public class LoopAroundSprite : MonoBehaviour
 
         switch (Main.Instance.inputLength) {
             case 2:
-                offsetWidth = PositionRangeInAxis(loop, new int[] { 1 }, out maximumRight);
-                offsetHeight = PositionRangeInAxis(loop, new int[] { 0 }, out maximumDown);
+                offsetWidth = PositionRangeInAxis(loop, new int[] { 1 }, out maximumRight, out scaleWidth);
+                offsetHeight = PositionRangeInAxis(loop, new int[] { 0 }, out maximumDown, out scaleHeight);
                 break;
             case 3:
-                offsetWidth = PositionRangeInAxis(loop, new int[] { 1, 2 }, out maximumRight);
-                offsetHeight = PositionRangeInAxis(loop, new int[] { 0 }, out maximumDown);
+                offsetWidth = PositionRangeInAxis(loop, new int[] { 1, 2 }, out maximumRight, out scaleWidth);
+                offsetHeight = PositionRangeInAxis(loop, new int[] { 0 }, out maximumDown, out scaleHeight);
                 break;
             case 4:
-                offsetWidth = PositionRangeInAxis(loop, new int[] { 2, 3 }, out maximumRight);
-                offsetHeight = PositionRangeInAxis(loop, new int[] { 0, 1 }, out maximumDown);
+                offsetWidth = PositionRangeInAxis(loop, new int[] { 2, 3 }, out maximumRight, out scaleWidth);
+                offsetHeight = PositionRangeInAxis(loop, new int[] { 0, 1 }, out maximumDown, out scaleHeight);
                 break;
             default:
                 maximumRight = maximumDown = 0;
@@ -48,31 +48,23 @@ public class LoopAroundSprite : MonoBehaviour
         }
 
         // Horizontal positioning - with special case for "wrap-around" loops.
-        if (offsetWidth == 0 && maximumRight == 3) {
+        if (scaleWidth == 2 && offsetWidth == 0 && maximumRight == 3) {
             offsetWidth = 3;
-            scaleWidth = 2;
-        }
-        else {
-            scaleWidth += maximumRight - offsetWidth;
         }
         // Vertical positioning - with special case for "wrap-around" loops.
-        if (offsetHeight == 0 && maximumDown == 3) {
+        if (scaleHeight == 2 && offsetHeight == 0 && maximumDown == 3) {
             offsetHeight = 3;
-            scaleHeight = 2;
-        }
-        else {
-            scaleHeight += maximumDown - offsetHeight;
         }
 
-        // Column offset -ve: Increasing indexes appear top-to-bottom, i.e. decreasing y.
         RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
+
+        // Column offset -ve: Increasing indexes appear top-to-bottom, i.e. decreasing y.
         rectTransform.position = new Vector3(offsetWidth, -offsetHeight) * positionScale + offset.position;
         rectTransform.sizeDelta = new Vector2(scaleWidth * positionScale, scaleHeight * positionScale);
     }
 
-    public int PositionRangeInAxis(KMapLoop loop, int[] checkBits, out int maximum) {
+    public int PositionRangeInAxis(KMapLoop loop, int[] checkBits, out int maximum, out int numTilesInAxis) {
         // Get the leftmost and rightmost position, or upmost and downmost position.
-        // 
         KMapLoop singleAxisLoop = new KMapLoop();
         foreach (int bit in checkBits) {
             singleAxisLoop.Add(loop[bit]);
@@ -89,6 +81,7 @@ public class LoopAroundSprite : MonoBehaviour
             if (lineIndex > maximum)
                 maximum = lineIndex;
         }
+        numTilesInAxis = combinations.Count();
         return minimum;
     }
 

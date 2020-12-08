@@ -24,9 +24,20 @@ public class KMapInterface : MonoBehaviour
     public void SolveKMap() {
         Main.Instance.OnChangeInput();
         KMapSimplify.Solve();
-        ResetLoopSprites();
 
+        ResetLoopSprites();
+        StartCoroutine(DrawLoopSprites());
+    }
+
+    public void ResetLoopSprites() {
+        foreach (GameObject loop in drawnLoops) {
+            Destroy(loop);
+        }
+    }
+
+    public IEnumerator DrawLoopSprites() {
         foreach (KMapLoop loop in Main.Instance.loops) {
+            yield return new WaitForEndOfFrame();
             GameObject loopSprite = Instantiate(KMapLoopSprite, Vector3.zero, Quaternion.identity,
                 overlayGroup.transform);
             LoopAroundSprite loopSpritePlacement = loopSprite.GetComponent<LoopAroundSprite>();
@@ -34,12 +45,6 @@ public class KMapInterface : MonoBehaviour
             loopSpritePlacement.offset = overlayStartOffset;
             loopSpritePlacement.PositionInOverlay();
             drawnLoops.Add(loopSprite);
-        }
-    }
-
-    public void ResetLoopSprites() {
-        foreach (GameObject loop in drawnLoops) {
-            Destroy(loop);
         }
     }
 

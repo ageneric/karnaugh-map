@@ -9,13 +9,22 @@ public static class KMapSimplify
     // Simplify the k-map by finding "loops" in the binary grid.
 
     public static void Solve() {
+        // Each grid index that has been added to a loop is considered a connected tile.
+        // When ExpandLoop() returns, each connected tile is optimally looped, so is not checked again.
+        bool[] tilesConnected = new bool[Main.Instance.GridSize];
+
         for (int index = 0; index < Main.Instance.GridSize; index++) {
             // For each bit that is set, form loops.
             if (Main.Instance.gridState[index]) {
                 KMapLoop startLoop = SeedLoop(index);
-
-                // Expand the loop -> Adds loops to Main.Instance.loops;
-                ExpandLoop(startLoop, index);
+                // Expand the loop around each tile (maximal loops saved to Main.Instance.loops).
+                if (!tilesConnected[index]) {
+                    tilesConnected[index] = true;
+                    ExpandLoop(startLoop, tilesConnected, true);
+                }
+                else {
+                    ExpandLoop(startLoop, tilesConnected, false);
+                }
             }
         }
     }
@@ -30,10 +39,13 @@ public static class KMapSimplify
         return loop;
     }
 
-    public static void ExpandLoop(KMapLoop startLoop, int minimumIndex) {
-        List<KMapLoop> currentLoops = new List<KMapLoop>();
-        bool isMaximum = true;
-        Debug.Log("Start about: " + startLoop.ToPresentableString());
+    public static void ExpandLoop(KMapLoop startLoop, bool[] tilesConnected, bool isMaximum, int depth = 0) {
+        if (depth > 32) {
+            Debug.LogWarning("Exceeded recursion limit.");
+            return;
+        }
+
+        Debug.Log("Start about: " + startLoop.ToPresentableString() + " Connected: " + string.Join(", ", tilesConnected));
 
         // For each flippable bit (neighbouring tile).
         for (int flipBit = 0; flipBit < Main.Instance.inputLength; flipBit++) {
@@ -42,39 +54,47 @@ public static class KMapSimplify
             }
             // Create the neighbouring loop.
             KMapLoop neighbour = AdjacentLoop(startLoop, flipBit);
-            Debug.Log("Neighbour: " + neighbour.ToPresentableString());
 
             // Unpack into all the tile indexes contained in the neighbouring loop.
-            List<int> neighbourTileList = new List<int>();
-            IEnumerable<IEnumerable<bool>> combinations = CrossProductCombinations(neighbour);
+            List<int> neighbourTileList = UnpackForNewTiles(neighbour);
+            Debug.Log("Neighbour: " + neighbour.ToPresentableString() + " Checking tiles: " + string.Join(", ", neighbourTileList));
 
-            foreach (IEnumerable<bool> tileBitList in combinations) {
-                int gridIndex = BinaryHelper.BooleanToBinaryValue(tileBitList.ToArray());
-                neighbourTileList.Add(gridIndex);
-            }
-            Debug.Log("Checking tiles: " + string.Join(", ", neighbourTileList));
-
-            // Avoid overlap with any previously maximised tiles.
-            if (neighbourTileList.Any(tileIndex => tileIndex < minimumIndex)) {
+            // If all those tiles are contained in other loops, avoid the overlap.
+            if (neighbourTileList.All(tileIndex => tilesConnected[tileIndex])) {
                 continue;
             }
             // If all those tiles are set to 1, can merge together into larger loop.
-            else if (neighbourTileList.All(tileIndex => Main.Instance.gridState[tileIndex])) {
+            if (neighbourTileList.All(tileIndex => Main.Instance.gridState[tileIndex])) {
                 KMapLoop mergeLoop = MergeAdjacent(startLoop, neighbour);
                 Debug.Log("Merged: " + mergeLoop.ToPresentableString());
 
-                currentLoops.Add(mergeLoop);
+                foreach (int tileIndex in neighbourTileList) {
+                    tilesConnected[tileIndex] = true;
+                }
+                ExpandLoop(mergeLoop, tilesConnected, true, depth + 1);
+                foreach (int tileIndex in neighbourTileList) {
+                    ExpandLoop(SeedLoop(tileIndex), tilesConnected, false, depth + 1);
+                }
                 isMaximum = false;
             }
         }
 
+        Debug.Log(startLoop.ToPresentableString() + " " + isMaximum);
+
         // Append remaining to loop list (add original only if it can't be expanded).
-        if (isMaximum) {
+        if (isMaximum)
             Main.Instance.loops.Add(startLoop);
+    }
+
+    public static List<int> UnpackForNewTiles(KMapLoop loop) {
+        List<int> neighbourTileList = new List<int>();
+        IEnumerable<IEnumerable<bool>> combinations = CrossProductCombinations(loop);
+
+        foreach (IEnumerable<bool> tileBitList in combinations) {
+            int gridIndex = BinaryHelper.BooleanToBinaryValue(tileBitList.ToArray());
+            neighbourTileList.Add(gridIndex);
         }
-        else {
-            Main.Instance.loops.AddRange(currentLoops);
-        }
+        return neighbourTileList;
     }
 
     public static KMapLoop AdjacentLoop(KMapLoop startLoop, int flipBit) {
