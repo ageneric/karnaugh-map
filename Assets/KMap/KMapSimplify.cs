@@ -8,25 +8,38 @@ public static class KMapSimplify
 {
     // Simplify the k-map by finding "loops" in the binary grid.
 
-    public static void Solve() {
-        // Each grid index that has been added to a loop is considered a connected tile.
-        // When ExpandLoop() returns, each connected tile is optimally looped, so is not checked again.
-        bool[] tilesConnected = new bool[Main.Instance.GridSize];
+    private static List<KMapLoop> workingLoops;
 
-        for (int index = 0; index < Main.Instance.GridSize; index++) {
-            // For each bit that is set, form loops.
-            if (Main.Instance.gridState[index]) {
-                KMapLoop startLoop = SeedLoop(index);
-                // Expand the loop around each tile (maximal loops saved to Main.Instance.loops).
-                if (!tilesConnected[index]) {
-                    tilesConnected[index] = true;
-                    ExpandLoop(startLoop, tilesConnected, true);
-                }
-                else {
-                    ExpandLoop(startLoop, tilesConnected, false);
+    public static void Solve() {
+        workingLoops = new List<KMapLoop>(); // Holds any maximal loops found that may not be essential.
+        int[] cellsVisited = new int[Main.Instance.GridSize];
+
+        // Find and maximise essential cells first.
+        // If a cell is only covered by one loop, it is essential for the optimal solution.
+        for (int gridIndex = 0; gridIndex < Main.Instance.GridSize; gridIndex++) {
+            if (Main.Instance.gridState[gridIndex] && cellsVisited[gridIndex] == 0) {
+                // For each bit that is set, form a loop containing it, and expand to find maximal loops.
+                if (SingleCellConnectionCount(gridIndex) <= 1) {
+                    KMapLoop startLoop = SeedLoop(gridIndex);
+                    cellsVisited[gridIndex]++;
+                    ExpandLoop(startLoop, cellsVisited, true);
                 }
             }
         }
+        // Form loops around all remaining cells.
+        for (int gridIndex = 0; gridIndex < Main.Instance.GridSize; gridIndex++) {
+            if (Main.Instance.gridState[gridIndex] && cellsVisited[gridIndex] == 0) {
+                // For each bit that is set, form a loop containing it, and expand to find maximal loops.
+                KMapLoop startLoop = SeedLoop(gridIndex);
+                cellsVisited[gridIndex]++;
+                ExpandLoop(startLoop, cellsVisited, false);
+            }
+        }
+
+        foreach (KMapLoop possibleLoop in workingLoops) {
+            Debug.Log(possibleLoop.ToPresentableString());
+        }
+        Main.Instance.loops.AddRange(workingLoops);
     }
 
     public static KMapLoop SeedLoop(int startIndex) {
@@ -39,15 +52,25 @@ public static class KMapSimplify
         return loop;
     }
 
-    public static void ExpandLoop(KMapLoop startLoop, bool[] tilesConnected, bool isMaximum, int depth = 0) {
-        if (depth > 32) {
-            Debug.LogWarning("Exceeded recursion limit.");
-            return;
+    public static int SingleCellConnectionCount(int startIndex) {
+        int connectionCount = 0;
+
+        // For each flippable bit (neighbouring cell).
+        for (int flipBit = 0; flipBit < Main.Instance.inputLength; flipBit++) {
+            // Check the neighbouring cell and record if it is true (connectable).
+            if (Main.Instance.gridState[startIndex ^ BinaryHelper.PowBaseTwo(flipBit)])
+                connectionCount++;
         }
+        return connectionCount;
+    }
 
-        Debug.Log("Start about: " + startLoop.ToPresentableString() + " Connected: " + string.Join(", ", tilesConnected));
+    public static void ExpandLoop(KMapLoop startLoop, int[] cellsLoopCount, bool isEssential, List<int> cellsConnected=null) {
+        if (cellsConnected is null)
+            cellsConnected = new List<int>();
+        bool isMaximum = true;
+        Debug.Log("Start about: " + startLoop.ToPresentableString() + " Connected: " + string.Join(", ", cellsLoopCount));
 
-        // For each flippable bit (neighbouring tile).
+        // For each flippable bit (neighbouring cell / loop).
         for (int flipBit = 0; flipBit < Main.Instance.inputLength; flipBit++) {
             if (startLoop[flipBit].Count == 2) {
                 continue;
@@ -55,26 +78,24 @@ public static class KMapSimplify
             // Create the neighbouring loop.
             KMapLoop neighbour = AdjacentLoop(startLoop, flipBit);
 
-            // Unpack into all the tile indexes contained in the neighbouring loop.
-            List<int> neighbourTileList = UnpackForNewTiles(neighbour);
-            Debug.Log("Neighbour: " + neighbour.ToPresentableString() + " Checking tiles: " + string.Join(", ", neighbourTileList));
+            // Unpack into all the cell indexes contained in the neighbouring loop.
+            List<int> neighbourCellList = UnpackForNewCells(neighbour);
+            Debug.Log("Neighbour: " + neighbour.ToPresentableString() + " Checking cells: " + string.Join(", ", neighbourCellList));
 
-            // If all those tiles are contained in other loops, avoid the overlap.
-            if (neighbourTileList.All(tileIndex => tilesConnected[tileIndex])) {
+            // If the neighbour is already connected within a previous larger loop, avoid the overlap.
+            if (neighbourCellList.All(cellIndex => cellsConnected.Contains(cellIndex))) {
                 continue;
             }
-            // If all those tiles are set to 1, can merge together into larger loop.
-            if (neighbourTileList.All(tileIndex => Main.Instance.gridState[tileIndex])) {
+            // If all those cells are set to 1, can merge together into larger loop.
+            if (neighbourCellList.All(cellIndex => Main.Instance.gridState[cellIndex])) {
                 KMapLoop mergeLoop = MergeAdjacent(startLoop, neighbour);
                 Debug.Log("Merged: " + mergeLoop.ToPresentableString());
 
-                foreach (int tileIndex in neighbourTileList) {
-                    tilesConnected[tileIndex] = true;
+                foreach (int cellIndex in neighbourCellList) {
+                    cellsLoopCount[cellIndex]++;
+                    cellsConnected.Add(cellIndex);
                 }
-                ExpandLoop(mergeLoop, tilesConnected, true, depth + 1);
-                foreach (int tileIndex in neighbourTileList) {
-                    ExpandLoop(SeedLoop(tileIndex), tilesConnected, false, depth + 1);
-                }
+                ExpandLoop(mergeLoop, cellsLoopCount, isEssential, cellsConnected);
                 isMaximum = false;
             }
         }
@@ -82,19 +103,24 @@ public static class KMapSimplify
         Debug.Log(startLoop.ToPresentableString() + " " + isMaximum);
 
         // Append remaining to loop list (add original only if it can't be expanded).
-        if (isMaximum)
-            Main.Instance.loops.Add(startLoop);
+        
+        if (isMaximum) {
+            if (isEssential)
+                Main.Instance.loops.Add(startLoop);
+            else
+                workingLoops.Add(startLoop);
+        }
     }
 
-    public static List<int> UnpackForNewTiles(KMapLoop loop) {
-        List<int> neighbourTileList = new List<int>();
-        IEnumerable<IEnumerable<bool>> combinations = CrossProductCombinations(loop);
+    public static List<int> UnpackForNewCells(KMapLoop loop) {
+        List<int> neighbourCellList = new List<int>();
+        IEnumerable<IEnumerable<bool>> combinations = loop.CrossProductCombinations();
 
-        foreach (IEnumerable<bool> tileBitList in combinations) {
-            int gridIndex = BinaryHelper.BooleanToBinaryValue(tileBitList.ToArray());
-            neighbourTileList.Add(gridIndex);
+        foreach (IEnumerable<bool> cellBitList in combinations) {
+            int gridIndex = BinaryHelper.BooleanToBinaryValue(cellBitList.ToArray());
+            neighbourCellList.Add(gridIndex);
         }
-        return neighbourTileList;
+        return neighbourCellList;
     }
 
     public static KMapLoop AdjacentLoop(KMapLoop startLoop, int flipBit) {

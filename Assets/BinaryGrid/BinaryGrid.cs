@@ -12,12 +12,13 @@ public class BinaryGrid : MonoBehaviour
     public List<GameObject> gridToggleButtons;
     public GameObject gridGroup;
     public Transform gridStartOffset;
+    public GridScene sceneManager;
 
     // Start is called before the first frame update
     void Start()
     {
         StartInitialiseGrid();
-        ResetGrid(Main.Instance.inputLength);
+        ResetGrid();
     }
 
     public void StartInitialiseGrid() {
@@ -28,16 +29,15 @@ public class BinaryGrid : MonoBehaviour
             ToggleBit toggleBit = toggleButton.GetComponent<ToggleBit>();
             toggleBit.index = i;
             toggleBit.offset = gridStartOffset;
+            toggleBit.sceneManager = sceneManager;
             gridToggleButtons.Add(toggleButton);
         }
 
         poolToggleButtons = gridToggleButtons.ToArray();
     }
 
-    public void ResetGrid(int inputLength) {
-        Main.Instance.UpdateInputLength(inputLength);
-
-        switch (inputLength) {
+    public void ResetGrid() {
+        switch (Main.Instance.inputLength) {
             case 2:
                 gridWidth = 2; gridHeight = 2; break;
             case 3:
@@ -64,11 +64,5 @@ public class BinaryGrid : MonoBehaviour
                 toggleButton.SetActive(false);
             }
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 }

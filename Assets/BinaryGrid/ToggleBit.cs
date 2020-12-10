@@ -10,20 +10,21 @@ public class ToggleBit : MonoBehaviour
     [EditorReadOnly] public Transform offset;
     public float positionScale;
     public Text label;
+    public Toggle toggle;
+    [EditorReadOnly] public GridScene sceneManager;
 
     public void Toggle() {
         Main.Instance.gridState[index] = !Main.Instance.gridState[index];
         UpdateDisplay();
+        sceneManager.UpdateInput();
     }
 
     public void Reset() {
-        gameObject.GetComponent<Toggle>().SetIsOnWithoutNotify(Main.Instance.gridState[index]);
+        toggle.SetIsOnWithoutNotify(Main.Instance.gridState[index]);
         UpdateDisplay();
     }
 
     public void UpdateDisplay() {
-        Main.Instance.OnChangeInput();
-        FindObjectOfType<KMapInterface>().ResetLoopSprites();
         if (Main.Instance.gridState[index]) {
             label.text = index.ToString() + ":1";
         }

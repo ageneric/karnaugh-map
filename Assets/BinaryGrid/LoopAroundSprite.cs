@@ -63,7 +63,7 @@ public class LoopAroundSprite : MonoBehaviour
         rectTransform.sizeDelta = new Vector2(scaleWidth * positionScale, scaleHeight * positionScale);
     }
 
-    public int PositionRangeInAxis(KMapLoop loop, int[] checkBits, out int maximum, out int numTilesInAxis) {
+    public int PositionRangeInAxis(KMapLoop loop, int[] checkBits, out int maximum, out int numCellsInAxis) {
         // Get the leftmost and rightmost position, or upmost and downmost position.
         KMapLoop singleAxisLoop = new KMapLoop();
         foreach (int bit in checkBits) {
@@ -73,15 +73,15 @@ public class LoopAroundSprite : MonoBehaviour
         int minimum = BinaryHelper.PowBaseTwo(checkBits.Length);
         maximum = 0;
 
-        foreach (IEnumerable<bool> tileBitList in combinations) {
-            int lineIndex = BinaryHelper.GrayCode(BinaryHelper.BooleanToBinaryValue(tileBitList.ToArray()));
+        foreach (IEnumerable<bool> cellBitList in combinations) {
+            int lineIndex = BinaryHelper.GrayCode(BinaryHelper.BooleanToBinaryValue(cellBitList.ToArray()));
 
             if (lineIndex < minimum)
                 minimum = lineIndex;
             if (lineIndex > maximum)
                 maximum = lineIndex;
         }
-        numTilesInAxis = combinations.Count();
+        numCellsInAxis = combinations.Count();
         return minimum;
     }
 
