@@ -41,7 +41,7 @@ public class KMapOverlay : MonoBehaviour
         Debug.Log(Main.Instance.loops.Count.ToString() + " loop(s):");
 
         foreach (KMapLoop loop in Main.Instance.loops) {
-            Debug.Log(loop.ToPresentableString());
+            Debug.Log(loop.ToReadableString());
         }
     }
 }

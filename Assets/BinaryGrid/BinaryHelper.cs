@@ -25,6 +25,32 @@ public static class BinaryHelper
         }
     }
 
+    public static int GrayCode16(int index) {
+        int fours = Math.DivRem(index, 4, out int units);
+        return GrayCode(fours) * 4 + GrayCode(units);
+    }
+
+    public static List<int> DiagonalWeave(int gridSize) {
+        // 0, 3, 5, 6, 12, 15...
+        // Lists grid indexes in a checkerboard pattern as viewed on a k-map.
+        // Every index in each checkerboard is separated diagonally from the other indexes.
+        List<int> primaryDiagonalList = new List<int>();
+        List<int> secondaryDiagonalList = new List<int>();
+
+        for (int i = 0; i < gridSize; i++) {
+            // Alternate adding cells to the first / second checkerboards.
+            if ((i % 2 == 0) ^ BitIsSet(i, 2)) {
+                primaryDiagonalList.Add(GrayCode16(i));
+            }
+            else {
+                secondaryDiagonalList.Add(GrayCode16(i));
+            }
+        }
+
+        primaryDiagonalList.AddRange(secondaryDiagonalList);
+        return primaryDiagonalList;
+    }
+
     public static bool BitIsSet(int value, int index) {
         int maskedBinary = value & (1 << index);
         return maskedBinary != 0;

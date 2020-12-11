@@ -19,7 +19,7 @@ public static class KMapExtensionMethods
         );
     }
 
-    public static string ToPresentableString(this KMapLoop loop) {
+    public static string ToReadableString(this KMapLoop loop) {
         List<string> loopStrings = new List<string>();
         foreach (List<bool> logicIncludeList in loop) {
 

@@ -11,34 +11,51 @@ public static class KMapSimplify
     private static List<KMapLoop> workingLoops;
 
     public static void Solve() {
-        workingLoops = new List<KMapLoop>(); // Holds any maximal loops found that may not be essential.
+        // Stores loops found during solving. Essential loops are moved to Main.Instance.loops.
+        workingLoops = new List<KMapLoop>();
+        // Stores the number of times each cell is looped. If a cell is only covered by one loop
+        // (has only been visited once), that loop is essential for an optimal solution.
         int[] cellsVisited = new int[Main.Instance.GridSize];
 
-        // Find and maximise essential cells first.
-        // If a cell is only covered by one loop, it is essential for the optimal solution.
-        for (int gridIndex = 0; gridIndex < Main.Instance.GridSize; gridIndex++) {
+        // Iterate through the grid. A checkerboard pattern is used, so that redundant checks
+        // between neighbouring cells are not made (which can lead to missing some loops).
+        List<int> diagonalCheckingOrder = BinaryHelper.DiagonalWeave(Main.Instance.GridSize);
+        for (int i = 0; i < Main.Instance.GridSize; i++) {
+            int gridIndex = diagonalCheckingOrder[i];
+
             if (Main.Instance.gridState[gridIndex] && cellsVisited[gridIndex] == 0) {
                 // For each bit that is set, form a loop containing it, and expand to find maximal loops.
                 if (SingleCellConnectionCount(gridIndex) <= 1) {
+                    // For optimisation, essential single/double loops are detected as they are made.
                     KMapLoop startLoop = SeedLoop(gridIndex);
                     cellsVisited[gridIndex]++;
-                    ExpandLoop(startLoop, cellsVisited, true);
+                    ExpandLoop(startLoop, true, gridIndex, cellsVisited);
+                }
+                else {
+                    KMapLoop startLoop = SeedLoop(gridIndex);
+                    cellsVisited[gridIndex]++;
+                    ExpandLoop(startLoop, false, gridIndex, cellsVisited);
                 }
             }
         }
-        // Form loops around all remaining cells.
-        for (int gridIndex = 0; gridIndex < Main.Instance.GridSize; gridIndex++) {
-            if (Main.Instance.gridState[gridIndex] && cellsVisited[gridIndex] == 0) {
-                // For each bit that is set, form a loop containing it, and expand to find maximal loops.
-                KMapLoop startLoop = SeedLoop(gridIndex);
-                cellsVisited[gridIndex]++;
-                ExpandLoop(startLoop, cellsVisited, false);
+
+        Debug.Log(string.Join(", ", cellsVisited));
+        Debug.Log("Main.loops:");
+        foreach (KMapLoop loop in Main.Instance.loops) {
+            Debug.Log(loop.ToReadableString());
+        }
+        Debug.Log("Identifying from working loops:");
+        // Identify essential loops from the working list and add them to the finished list.
+        for (int i = workingLoops.Count - 1; i >= 0; i--) {
+            List<int> cellList = UnpackLoopToCells(workingLoops[i]);
+            if (cellList.Any(gridIndex => cellsVisited[gridIndex] == 1)) {
+                Debug.Log(workingLoops[i].ToReadableString() + " is E[P'].");
+                Main.Instance.loops.Add(workingLoops[i]);
+                workingLoops.RemoveAt(i);
             }
         }
-
-        foreach (KMapLoop possibleLoop in workingLoops) {
-            Debug.Log(possibleLoop.ToPresentableString());
-        }
+        // TODO: Remove overlapping loops.
+        Debug.Log(workingLoops.Count.ToString());
         Main.Instance.loops.AddRange(workingLoops);
     }
 
@@ -64,43 +81,46 @@ public static class KMapSimplify
         return connectionCount;
     }
 
-    public static void ExpandLoop(KMapLoop startLoop, int[] cellsLoopCount, bool isEssential, List<int> cellsConnected=null) {
-        if (cellsConnected is null)
+    public static void ExpandLoop(KMapLoop startLoop, bool isEssential, int minimumIndex, int[] cellsLoopCount,
+                                  List<int> cellsConnected=null) {
+        if (cellsConnected is null) {
             cellsConnected = new List<int>();
+        }
         bool isMaximum = true;
-        Debug.Log("Start about: " + startLoop.ToPresentableString() + " Connected: " + string.Join(", ", cellsLoopCount));
+        Debug.Log("Start about: " + startLoop.ToReadableString());
 
         // For each flippable bit (neighbouring cell / loop).
         for (int flipBit = 0; flipBit < Main.Instance.inputLength; flipBit++) {
-            if (startLoop[flipBit].Count == 2) {
+            if (startLoop[flipBit].Count == 2)
                 continue;
-            }
+            
             // Create the neighbouring loop.
             KMapLoop neighbour = AdjacentLoop(startLoop, flipBit);
 
             // Unpack into all the cell indexes contained in the neighbouring loop.
-            List<int> neighbourCellList = UnpackForNewCells(neighbour);
-            Debug.Log("Neighbour: " + neighbour.ToPresentableString() + " Checking cells: " + string.Join(", ", neighbourCellList));
+            List<int> neighbourCellList = UnpackLoopToCells(neighbour);
+            Debug.Log("Neighbour: " + neighbour.ToReadableString());
 
             // If the neighbour is already connected within a previous larger loop, avoid the overlap.
-            if (neighbourCellList.All(cellIndex => cellsConnected.Contains(cellIndex))) {
-                continue;
+            if (neighbourCellList.All(gridIndex => cellsConnected.Contains(gridIndex))) {
+                foreach (int gridIndex in neighbourCellList)
+                   cellsLoopCount[gridIndex]++;
             }
             // If all those cells are set to 1, can merge together into larger loop.
-            if (neighbourCellList.All(cellIndex => Main.Instance.gridState[cellIndex])) {
+            else if (neighbourCellList.All(gridIndex => Main.Instance.gridState[gridIndex])) {
                 KMapLoop mergeLoop = MergeAdjacent(startLoop, neighbour);
-                Debug.Log("Merged: " + mergeLoop.ToPresentableString());
+                Debug.Log("Merged: " + mergeLoop.ToReadableString());
 
-                foreach (int cellIndex in neighbourCellList) {
-                    cellsLoopCount[cellIndex]++;
-                    cellsConnected.Add(cellIndex);
+                foreach (int gridIndex in neighbourCellList) {
+                    cellsLoopCount[gridIndex]++;
+                    cellsConnected.Add(gridIndex);
                 }
-                ExpandLoop(mergeLoop, cellsLoopCount, isEssential, cellsConnected);
+                ExpandLoop(mergeLoop, isEssential, minimumIndex, cellsLoopCount, cellsConnected);
                 isMaximum = false;
             }
         }
 
-        Debug.Log(startLoop.ToPresentableString() + " " + isMaximum);
+        Debug.Log(startLoop.ToReadableString() + " " + isMaximum);
 
         // Append remaining to loop list (add original only if it can't be expanded).
         
@@ -112,7 +132,7 @@ public static class KMapSimplify
         }
     }
 
-    public static List<int> UnpackForNewCells(KMapLoop loop) {
+    public static List<int> UnpackLoopToCells(KMapLoop loop) {
         List<int> neighbourCellList = new List<int>();
         IEnumerable<IEnumerable<bool>> combinations = loop.CrossProductCombinations();
 
