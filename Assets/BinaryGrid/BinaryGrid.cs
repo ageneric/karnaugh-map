@@ -15,7 +15,7 @@ public class BinaryGrid : MonoBehaviour
     public GridScene sceneManager;
 
     // Start is called before the first frame update
-    void Start()
+    public void Start()
     {
         StartInitialiseGrid();
         ResetGrid();
@@ -46,7 +46,11 @@ public class BinaryGrid : MonoBehaviour
                 gridWidth = 4; gridHeight = 4; break;
             default:
                 Debug.LogWarning("Invalid [ResetGrid(input_dim)] binary input size, out of range (2 - 4).");
-                gridWidth = 2; gridHeight = 2; break;
+                gridWidth = 2; gridHeight = 2;
+                foreach (GameObject toggleButton in poolToggleButtons) {
+                    toggleButton.SetActive(false);
+                }
+                return;
         }
 
         // Enable and reset only the needed buttons. Deactivate unused buttons.

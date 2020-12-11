@@ -19,13 +19,16 @@ public static class KMapExtensionMethods
         );
     }
 
+    // Alphabet for input bit names (doesn't include I, Q).
+    public static string logicVariableAlphabet = "ABCDEFGHJKLMNOPRSTUVWXYZ";
+
     public static string ToReadableString(this KMapLoop loop) {
         List<string> loopStrings = new List<string>();
         foreach (List<bool> logicIncludeList in loop) {
 
             string representation;
             if (logicIncludeList.Count == 1) {
-                if (logicIncludeList[0] == true)
+                if (logicIncludeList[0])
                     representation = "1";
                 else
                     representation = "0";
@@ -33,8 +36,23 @@ public static class KMapExtensionMethods
             else {
                 representation = "X";
             }
-            loopStrings.Add(string.Join("", representation));
+            loopStrings.Add(representation);
         }
         return "{" + string.Join(", ", loopStrings) + "}";
+    }
+
+    public static string ToProductsString(this KMapLoop loop) {
+        List<string> loopStrings = new List<string>();
+
+        // Create the strings from each logic value (used for "sum-of-products" notation).
+        for (int i = 0; i < loop.Count; i++) {
+            if (loop[i].Count == 1) {
+                if (loop[i][0])
+                    loopStrings.Add(logicVariableAlphabet[i].ToString());
+                else
+                    loopStrings.Add("¬" + logicVariableAlphabet[i]);
+            }
+        }
+        return string.Join(".", loopStrings);
     }
 }

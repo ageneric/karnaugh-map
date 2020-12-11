@@ -16,12 +16,11 @@ public class LoopAroundSprite : MonoBehaviour
     private float colorSaturation;
     private float colorBrightness;
 
-    private void Start() {
+    private void Awake() {
         Color.RGBToHSV(loopImage.color, out _, out colorSaturation, out colorBrightness);
-        ColorSprite(Random.value);
     }
 
-    public void PositionInOverlay() {
+    public List<int[]> PositionInOverlay() {
         int offsetWidth = 0;
         int offsetHeight = 0;
         int scaleWidth = 1;
@@ -46,21 +45,31 @@ public class LoopAroundSprite : MonoBehaviour
                 maximumRight = maximumDown = 0;
                 break;
         }
+        bool wrapAroundWidth = false;
+        bool wrapAroundHeight = false;
 
         // Horizontal positioning - with special case for "wrap-around" loops.
         if (scaleWidth == 2 && offsetWidth == 0 && maximumRight == 3) {
-            offsetWidth = 3;
+            offsetWidth = maximumRight;
+            wrapAroundWidth = true;
         }
         // Vertical positioning - with special case for "wrap-around" loops.
         if (scaleHeight == 2 && offsetHeight == 0 && maximumDown == 3) {
-            offsetHeight = 3;
+            offsetHeight = maximumDown;
+            wrapAroundHeight = true;
         }
+        SetPosition(offsetWidth, offsetHeight, scaleWidth, scaleHeight);
+        List<int[]> wrapAround = new List<int[]>();
 
-        RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
+        // Display ghost copies of this sprite to show it wrapping around the grid.
+        if (wrapAroundHeight)
+            wrapAround.Add(new int[] { offsetWidth, offsetHeight - 4, scaleWidth, scaleHeight });
+        if (wrapAroundWidth)
+            wrapAround.Add(new int[] { offsetWidth - 4, offsetHeight, scaleWidth, scaleHeight });
+        if (wrapAroundHeight && wrapAroundWidth)
+            wrapAround.Add(new int[] { offsetWidth - 4, offsetHeight - 4, scaleWidth, scaleHeight });
 
-        // Column offset -ve: Increasing indexes appear top-to-bottom, i.e. decreasing y.
-        rectTransform.position = new Vector3(offsetWidth, -offsetHeight) * positionScale + offset.position;
-        rectTransform.sizeDelta = new Vector2(scaleWidth * positionScale, scaleHeight * positionScale);
+        return wrapAround;
     }
 
     public int PositionRangeInAxis(KMapLoop loop, int[] checkBits, out int maximum, out int numCellsInAxis) {
@@ -85,8 +94,25 @@ public class LoopAroundSprite : MonoBehaviour
         return minimum;
     }
 
+    public void SetPosition(int offsetWidth, int offsetHeight, int scaleWidth, int scaleHeight) {
+        RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
+
+        // Column offset -ve: Increasing indexes appear top-to-bottom, i.e. decreasing y.
+        rectTransform.position = new Vector3(offsetWidth, -offsetHeight) * positionScale + offset.position;
+        rectTransform.sizeDelta = new Vector2(scaleWidth, scaleHeight) * positionScale;
+
+        float shrinkWidth = 0f;
+        float shrinkHeight = 0f;
+        if (scaleWidth == 2)
+            shrinkWidth = 0.2f;
+        if (scaleHeight == 2)
+            shrinkHeight = 0.2f;
+        rectTransform.position -= new Vector3(shrinkWidth, -shrinkHeight);
+        rectTransform.sizeDelta -= new Vector2(shrinkWidth, -shrinkHeight);
+    }
+
     public void ColorSprite(float hue) {
         loopImage.color = Color.HSVToRGB(hue, colorSaturation, colorBrightness);
-        loopImage.canvasRenderer.SetAlpha(0.3f);
+        loopImage.canvasRenderer.SetAlpha(0.375f);
     }
 }

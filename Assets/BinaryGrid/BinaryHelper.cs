@@ -25,9 +25,16 @@ public static class BinaryHelper
         }
     }
 
-    public static int GrayCode16(int index) {
-        int fours = Math.DivRem(index, 4, out int units);
-        return GrayCode(fours) * 4 + GrayCode(units);
+    public static int ExtendedGrayCode(int index) {
+        int grayValue = 0;
+        int exponent = 0;
+
+        while (index > 0) {
+            index = Math.DivRem(index, 4, out int remainder);
+            grayValue += GrayCode(remainder) * PowBaseTwo(exponent);
+            exponent += 2;
+        }
+        return grayValue;
     }
 
     public static List<int> DiagonalWeave(int gridSize) {
@@ -40,10 +47,10 @@ public static class BinaryHelper
         for (int i = 0; i < gridSize; i++) {
             // Alternate adding cells to the first / second checkerboards.
             if ((i % 2 == 0) ^ BitIsSet(i, 2)) {
-                primaryDiagonalList.Add(GrayCode16(i));
+                primaryDiagonalList.Add(ExtendedGrayCode(i));
             }
             else {
-                secondaryDiagonalList.Add(GrayCode16(i));
+                secondaryDiagonalList.Add(ExtendedGrayCode(i));
             }
         }
 
