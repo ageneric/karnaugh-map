@@ -24,7 +24,7 @@ struct PrimeLoop
         return count;
     }
 
-    public int MinimumCellVisited(bool[] cellsDefinitelyCovered, int[] cellsVisited) {
+    public int MinCellVisits(bool[] cellsDefinitelyCovered, int[] cellsVisited) {
         int minimum = int.MaxValue;
         foreach (int gridIndex in CellList) {
             if (!cellsDefinitelyCovered[gridIndex])
@@ -45,24 +45,13 @@ public static class SimplifyWorkingList
         // Count the number of times each cell has been looped.
         List<PrimeLoop> currentLoops = new List<PrimeLoop>();
         foreach (KMapLoop possibleLoop in workingLoops) {
-            Debug.Log(possibleLoop.ToReadableString());
             PrimeLoop loopData = new PrimeLoop(possibleLoop, KMapSolve.UnpackLoopToCells(possibleLoop));
             foreach (int gridIndex in loopData.CellList)
                 cellsLoopCount[gridIndex]++;
 
             currentLoops.Add(loopData);
         }
-
-        Debug.Log(string.Join(", ", cellsLoopCount));
-
-        // Identify essential loops from the working list and add them to the finished list.
-        for (int i = currentLoops.Count - 1; i >= 0; i--) {
-            if (currentLoops[i].CellList.Any(gridIndex => cellsLoopCount[gridIndex] == 1)) {
-                Debug.Log(currentLoops[i].Loop.ToReadableString() + " is Essential[I'1].");
-                Main.Instance.loops.Add(currentLoops[i].Loop);
-                currentLoops.RemoveAt(i);
-            }
-        }
+        Debug.Log("Cell loop counts: " + string.Join(", ", cellsLoopCount));
 
         // Record all cells that are covered by essential loops (thus are not considered).
         bool[] cellsDefinitelyCovered = new bool[Main.Instance.GridSize];
@@ -75,22 +64,18 @@ public static class SimplifyWorkingList
         while (currentLoops.Count > 0) {
             // Identify essential loops from the working list and add them to the finished list.
             for (int i = currentLoops.Count - 1; i >= 0; i--) {
-                if (currentLoops[i].MinimumCellVisited(cellsDefinitelyCovered, cellsLoopCount) == 1) {
-                    Main.Instance.loops.Add(currentLoops[i].Loop);
+                if (currentLoops[i].MinCellVisits(cellsDefinitelyCovered, cellsLoopCount) == 1) {
                     foreach (int gridIndex in currentLoops[i].CellList)
                         cellsDefinitelyCovered[gridIndex] = true;
 
-                    Debug.Log(currentLoops[i].Loop.ToReadableString() + " is Essential[I'2].");
+                    Main.Instance.loops.Add(currentLoops[i].Loop);
                     currentLoops.RemoveAt(i);
                 }
             }
-            if (currentLoops.Count == 0)
-                continue;
 
             // Eliminate loops that are fully contained by essential loops (have no unique cells).
             for (int i = currentLoops.Count - 1; i >= 0; i--) {
                 if (currentLoops[i].CellList.All(gridIndex => cellsDefinitelyCovered[gridIndex])) {
-                    Debug.Log(currentLoops[i].Loop.ToReadableString() + " is not Essential[I'4].");
                     currentLoops.RemoveAt(i);
                 }
             }
@@ -109,18 +94,16 @@ public static class SimplifyWorkingList
                 foreach (int gridIndex in currentLoops.First().CellList)
                     cellsDefinitelyCovered[gridIndex] = true;
 
-                Debug.Log(currentLoops.First().Loop.ToReadableString() + " is Essential[I'3].");
                 currentLoops.RemoveAt(0);
             }
             else {
                 foreach (int gridIndex in currentLoops.Last().CellList)
                     cellsLoopCount[gridIndex]--;
 
-                Debug.Log(currentLoops.Last().Loop.ToReadableString() + " is not Essential[I'5].");
                 currentLoops.RemoveAt(currentLoops.Count - 1);
             }
 
-            Debug.Log(workingLoops.Count.ToString());
+            Debug.Log("Step. " + workingLoops.Count.ToString() + " loops remain.");
         }
     }
 }

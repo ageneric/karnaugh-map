@@ -13,9 +13,9 @@ public static class KMapSolve
     public static void Solve() {
         // Stores loops found during solving. Essential loops are moved to Main.Instance.loops.
         workingLoops = new List<KMapLoop>();
+        Main.Instance.loops = new List<KMapLoop>();
 
         bool[] cellsVisited = new bool[Main.Instance.GridSize];
-
         // Iterate through the grid. A checkerboard pattern is used, so that redundant checks
         // between neighbouring cells are not made (which can lead to missing some loops).
         List<int> diagonalCheckingOrder = BinaryHelper.DiagonalWeave(Main.Instance.GridSize);
@@ -36,14 +36,8 @@ public static class KMapSolve
                 cellsVisited[gridIndex] = true;
             }
         }
-
-        Debug.Log(string.Join(", ", cellsVisited));
-
-        Debug.Log("Main.loops:");
-        foreach (KMapLoop loop in Main.Instance.loops) {
-            Debug.Log(loop.ToReadableString());
-        }
-        Debug.Log("Identifying from working loops:");
+        Debug.Log("Generated " + Main.Instance.loops.Count.ToString() + " essential loops and"
+            + workingLoops.Count.ToString() + "others.");
 
         SimplifyWorkingList.Simplify(workingLoops);
     }
@@ -78,7 +72,7 @@ public static class KMapSolve
         if (cellsConnected is null)
             cellsConnected = new List<int>();
         bool isMaximum = true;
-        Debug.Log("Start about: " + startLoop.ToReadableString());
+        // Debug.Log("Start about: " + startLoop.ToReadableString());
 
         // For each flippable bit (neighbouring cell / loop).
         for (int flipBit = 0; flipBit < Main.Instance.inputLength; flipBit++) {
@@ -90,7 +84,6 @@ public static class KMapSolve
 
             // Unpack into all the cell indexes contained in the neighbouring loop.
             List<int> neighbourCellList = UnpackLoopToCells(neighbour);
-            Debug.Log("Neighbour: " + neighbour.ToReadableString());
 
             // If the neighbour is already connected within a previous larger loop, avoid the overlap.
             if (neighbourCellList.All(gridIndex => cellsConnected.Contains(gridIndex))) {
@@ -99,7 +92,7 @@ public static class KMapSolve
             // If all those cells are set to 1, can merge together into larger loop.
             else if (neighbourCellList.All(gridIndex => Main.Instance.gridState[gridIndex])) {
                 KMapLoop mergeLoop = MergeAdjacent(startLoop, neighbour);
-                Debug.Log("Merged: " + mergeLoop.ToReadableString());
+                // Debug.Log("Merged: " + mergeLoop.ToReadableString());
 
                 foreach (int gridIndex in neighbourCellList) {
                     cellsVisitedAllTime[gridIndex] = true;
@@ -109,8 +102,6 @@ public static class KMapSolve
                 isMaximum = false;
             }
         }
-
-        Debug.Log(startLoop.ToReadableString() + " " + isMaximum);
 
         // If no larger loops can be formed, the loop is maximally expanded, so it is saved to the list.
         if (isMaximum) {
@@ -163,3 +154,26 @@ public static class KMapSolve
         return mergeLoop;
     }
 }
+
+/* Example cases
+ * 
+ * 0 1 0 0  -> 4 loops (2)
+ * 0 1 1 1
+ * 1 1 1 0
+ * 0 0 1 0
+ * 
+ * 1 0 0 1  -> 4 loops (2)
+ * 0 0 1 1
+ * 0 1 1 0
+ * 1 1 0 0
+ * 
+ * 1 1 1 1  -> 1 loop  (1)
+ * 1 1 1 0  -> 3 loops (4)
+ * 0 0 0 1
+ * 0 0 0 0
+ * 
+ * 0 1 1 0  -> 1 loop  (2)
+ * 0 0 1 1  -> 2 loops (4)
+ * 1 1 1 1
+ * 1 1 0 0
+ */
