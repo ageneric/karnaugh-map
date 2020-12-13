@@ -19,9 +19,6 @@ public static class KMapExtensionMethods
         );
     }
 
-    // Alphabet for input bit names (doesn't include I, Q).
-    public static string logicVariableAlphabet = "ABCDEFGHJKLMNOPRSTUVWXYZ";
-
     public static string ToReadableString(this KMapLoop loop) {
         List<string> loopStrings = new List<string>();
         foreach (List<bool> logicIncludeList in loop) {
@@ -48,11 +45,15 @@ public static class KMapExtensionMethods
         for (int i = 0; i < loop.Count; i++) {
             if (loop[i].Count == 1) {
                 if (loop[i][0])
-                    loopStrings.Add(logicVariableAlphabet[i].ToString());
+                    loopStrings.Add(ParseExpression.logicVariableAlphabet[i].ToString());
                 else
-                    loopStrings.Add("¬" + logicVariableAlphabet[i]);
+                    loopStrings.Add("¬" + ParseExpression.logicVariableAlphabet[i]);
             }
         }
-        return string.Join(".", loopStrings);
+
+        if (loopStrings.Count > 0)
+            return string.Join(".", loopStrings);
+        else
+            return "1";
     }
 }

@@ -75,11 +75,11 @@ public class GridScene : MonoBehaviour
             }
         }
         if (Main.Instance.inputLength >= 2 && Main.Instance.inputLength <= 4) {
-            labelVariableVertical.text = KMapExtensionMethods.logicVariableAlphabet.Substring(0, bitsVertical);
-            labelVariableHorizontal.text = KMapExtensionMethods.logicVariableAlphabet.Substring(bitsVertical, bitsHorizontal);
+            labelVariableVertical.text = ParseExpression.logicVariableAlphabet.Substring(0, bitsVertical);
+            labelVariableHorizontal.text = ParseExpression.logicVariableAlphabet.Substring(bitsVertical, bitsHorizontal);
         }
-        else if (Main.Instance.inputLength >= 1 && Main.Instance.inputLength <= KMapExtensionMethods.logicVariableAlphabet.Length) {
-            labelVariableHorizontal.text = KMapExtensionMethods.logicVariableAlphabet.Substring(0, Main.Instance.inputLength);
+        else if (Main.Instance.inputLength >= 1 && Main.Instance.inputLength <= ParseExpression.logicVariableAlphabet.Length) {
+            labelVariableHorizontal.text = ParseExpression.logicVariableAlphabet.Substring(0, Main.Instance.inputLength);
             labelVariableVertical.text = "";
         }
     }
