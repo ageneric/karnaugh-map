@@ -41,7 +41,7 @@ public class GridScene : MonoBehaviour
 
     public void Solve() {
         Main.Instance.ClearLoops();
-        KMapSimplify.Solve();
+        KMapSolve.Solve();
 
         loopSpriteOverlay.Clear();
         if (Main.Instance.inputLength < 5)

@@ -78,7 +78,7 @@ public class LoopAroundSprite : MonoBehaviour
         foreach (int bit in checkBits) {
             singleAxisLoop.Add(loop[bit]);
         }
-        IEnumerable<IEnumerable<bool>> combinations = KMapSimplify.CrossProductCombinations(singleAxisLoop);
+        IEnumerable<IEnumerable<bool>> combinations = singleAxisLoop.CrossProductCombinations();
         int minimum = BinaryHelper.PowBaseTwo(checkBits.Length);
         maximum = 0;
 
