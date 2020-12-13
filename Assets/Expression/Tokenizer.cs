@@ -77,29 +77,29 @@ namespace BooleanExpressionEngine
 
             // Single character identifier
             if (char.IsLetter(_currentChar)) {
-                NextChar();
                 Identifier = _currentChar;
+                NextChar();
                 Token = Token.Identifier;
                 return;
             }
 
             // Literal false?
             if (_currentChar == '0') {
-                NextChar();
                 Number = false;
+                NextChar();
                 Token = Token.Number;
                 return;
             }
 
             // Literal true?
             if (_currentChar == '1') {
-                NextChar();
                 Number = true;
+                NextChar();
                 Token = Token.Number;
                 return;
             }
 
-            throw new InvalidDataException($"Unexpected character: {_currentChar}");
+            throw new InvalidDataException("Unexpected character: " + _currentChar);
         }
     }
 }

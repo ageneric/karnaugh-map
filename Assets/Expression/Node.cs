@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace BooleanExpressionEngine
 {
@@ -82,11 +83,13 @@ namespace BooleanExpressionEngine
         char _variableName;
 
         public override bool Eval(Dictionary<char, bool> ctx) {
-            ctx.TryGetValue(_variableName, out bool value);
-            if (value)
+            try {
+                Debug.Log(_variableName);
                 return ctx[_variableName];
-            else
-                throw new SyntaxException("Missing variable from logic values.");
+            }
+            catch (KeyNotFoundException) {
+                throw new SyntaxException("Invalid variable name: please use only 'A', 'B', 'C', 'D' and/or 'E'");
+            }
         }
     }
 }
