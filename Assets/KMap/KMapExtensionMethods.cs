@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using KMapLoop = System.Collections.Generic.List<System.Collections.Generic.List<bool>>;
 
 public static class KMapExtensionMethods
@@ -19,23 +20,29 @@ public static class KMapExtensionMethods
         );
     }
 
-    public static string ToReadableString(this KMapLoop loop) {
-        List<string> loopStrings = new List<string>();
-        foreach (List<bool> logicIncludeList in loop) {
+    public static List<int> CellsCovered(this KMapLoop loop) {
+        List<int> neighbourCellList = new List<int>();
 
-            string representation;
-            if (logicIncludeList.Count == 1) {
-                if (logicIncludeList[0])
-                    representation = "1";
-                else
-                    representation = "0";
-            }
-            else {
-                representation = "X";
-            }
-            loopStrings.Add(representation);
+        foreach (IEnumerable<bool> cellBitList in loop.CrossProductCombinations()) {
+            int gridIndex = BinaryHelper.BooleanToBinaryValue(cellBitList.ToArray());
+            neighbourCellList.Add(gridIndex);
         }
-        return "{" + string.Join(", ", loopStrings) + "}";
+        return neighbourCellList;
+    }
+
+    public static string ToReadableString(this KMapLoop loop) {
+        StringBuilder representation = new StringBuilder();
+        representation.Append("{" + string.Join(" ", loop.CellsCovered()) + "} ");
+
+        foreach (List<bool> logicIncludeList in loop) {
+            if (logicIncludeList.Count == 2)
+                representation.Append('X');
+            else if (logicIncludeList[0])
+                representation.Append('1');
+            else
+                representation.Append('0');
+        }
+        return representation.ToString();
     }
 
     public static string ToProductsString(this KMapLoop loop) {

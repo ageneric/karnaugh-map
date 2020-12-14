@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using KMapLoop = System.Collections.Generic.List<System.Collections.Generic.List<bool>>;
 
 public static class KMapSolve
@@ -36,8 +35,9 @@ public static class KMapSolve
                 cellsVisited[gridIndex] = true;
             }
         }
-        Debug.Log("Generated " + Main.Instance.loops.Count.ToString() + " essential loops and"
-            + workingLoops.Count.ToString() + "others.");
+        // Log loop state for debugging.
+        CollectionHelper.LogLoopList("Essential loops", Main.Instance.loops);
+        CollectionHelper.LogLoopList("Other maximsed loops", workingLoops);
 
         SimplifyWorkingList.Simplify(workingLoops);
     }
@@ -83,7 +83,7 @@ public static class KMapSolve
             KMapLoop neighbour = AdjacentLoop(startLoop, flipBit);
 
             // Unpack into all the cell indexes contained in the neighbouring loop.
-            List<int> neighbourCellList = UnpackLoopToCells(neighbour);
+            List<int> neighbourCellList = neighbour.CellsCovered();
 
             // If the neighbour is already connected within a previous larger loop, avoid the overlap.
             if (neighbourCellList.All(gridIndex => cellsConnected.Contains(gridIndex))) {
@@ -110,16 +110,6 @@ public static class KMapSolve
             else
                 workingLoops.Add(startLoop);
         }
-    }
-
-    public static List<int> UnpackLoopToCells(KMapLoop loop) {
-        List<int> neighbourCellList = new List<int>();
-
-        foreach (IEnumerable<bool> cellBitList in loop.CrossProductCombinations()) {
-            int gridIndex = BinaryHelper.BooleanToBinaryValue(cellBitList.ToArray());
-            neighbourCellList.Add(gridIndex);
-        }
-        return neighbourCellList;
     }
 
     public static KMapLoop AdjacentLoop(KMapLoop startLoop, int flipBit) {

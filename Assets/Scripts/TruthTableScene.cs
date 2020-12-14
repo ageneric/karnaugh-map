@@ -26,13 +26,13 @@ public class TruthTableScene : MonoBehaviour
         try {
             bool[] truthTable = ParseExpression.GenerateTruthTable(input.text);
 
-            outputText.text = string.Join("\n ", truthTable);
+            outputText.text = string.Join("\n", truthTable);
 
             List<string> variableColumnText = new List<string>();
             for (int i = 0; i < truthTable.Length; i++) {
                 variableColumnText.Add(i.ToString());
             }
-            variablesText.text = string.Join("\n ", variableColumnText);
+            variablesText.text = string.Join("\n", variableColumnText);
         }
         catch (BooleanExpressionEngine.SyntaxException ex) {
             outputText.text = "Syntax invalid: " + ex.Message;
