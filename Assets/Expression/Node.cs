@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace BooleanExpressionEngine
 {
@@ -84,7 +83,6 @@ namespace BooleanExpressionEngine
 
         public override bool Eval(Dictionary<char, bool> ctx) {
             try {
-                Debug.Log(_variableName);
                 return ctx[_variableName];
             }
             catch (KeyNotFoundException) {

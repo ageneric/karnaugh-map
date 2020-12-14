@@ -2204,10 +2204,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   baseLoopSprite: {fileID: 6677206857806893777, guid: cbdc4ff3bd5124f43a06917bba8c2a36,
     type: 3}
-  displayedLoops: []
   overlayGroup: {fileID: 1384499903}
   overlayStartOffset: {fileID: 992656598}
   loopTextSOP: {fileID: 111581570}
+  textTintIntensity: 0.45
 --- !u!222 &1384499905
 CanvasRenderer:
   m_ObjectHideFlags: 0

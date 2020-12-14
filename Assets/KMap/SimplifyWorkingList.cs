@@ -35,7 +35,7 @@ public static class SimplifyWorkingList
                 // Look for loops which contain a cell that isn't contained by any other loop.
                 if (cellList.Any(gridIndex => !cellsDefinitelyCovered[gridIndex]
                         && cellsLoopCount[gridIndex] == 1)) {
-                    Debug.Log(workingLoops[i].ToReadableString() + " is essential: unique cell.");
+                    Debug.Log(workingLoops[i].ToReadableString() + " is essential: has unique cell.");
                     foreach (int gridIndex in cellList)
                         cellsDefinitelyCovered[gridIndex] = true;
 
@@ -64,6 +64,7 @@ public static class SimplifyWorkingList
                         indexWorstLoop = i;
                     }
                 }
+                Debug.Log(workingLoops[indexWorstLoop].ToReadableString() + " selected to remove.");
                 foreach (int gridIndex in workingLoops[indexWorstLoop].CellsCovered())
                     cellsLoopCount[gridIndex]--;
                 workingLoops.RemoveAt(indexWorstLoop);

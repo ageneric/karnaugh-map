@@ -9,7 +9,6 @@ public class LoopAroundSprite : MonoBehaviour
 {
     // Displays a single k-map loop which encircles the indexes it includes.
 
-    [EditorReadOnly] public List<List<bool>> loop;
     [EditorReadOnly] public Transform offset;
     public float positionScale;
     public Image loopImage;
@@ -20,7 +19,7 @@ public class LoopAroundSprite : MonoBehaviour
         Color.RGBToHSV(loopImage.color, out _, out colorSaturation, out colorBrightness);
     }
 
-    public List<int[]> PositionInOverlay() {
+    public List<int[]> PositionInOverlay(List<List<bool>> loop) {
         int offsetWidth = 0;
         int offsetHeight = 0;
         int scaleWidth = 1;
