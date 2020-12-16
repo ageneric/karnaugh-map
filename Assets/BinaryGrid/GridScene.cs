@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class GridScene : MonoBehaviour
 {
     public BinaryGrid grid;
-    public KMapDisplaySolution loopSpriteOverlay;
+    public DisplayLoopSolution loopSpriteOverlay;
     public Text[] labelTextHorizontal;
     public Text[] labelTextVertical;
     public Text labelVariableHorizontal;
@@ -50,7 +50,7 @@ public class GridScene : MonoBehaviour
 
         loopSpriteOverlay.Clear();
         if (Main.Instance.inputLength <= 4)
-            loopSpriteOverlay.QueueDraw();
+            loopSpriteOverlay.Draw();
         else
             loopSpriteOverlay.TextDraw();
     }
@@ -82,11 +82,11 @@ public class GridScene : MonoBehaviour
         }
 
         if (labelGrid) {
-            labelVariableVertical.text = ParseExpression.logicVariableAlphabet.Substring(0, bitsVertical);
-            labelVariableHorizontal.text = ParseExpression.logicVariableAlphabet.Substring(bitsVertical, bitsHorizontal);
+            labelVariableVertical.text = VariableExpression.logicVariableAlphabet.Substring(0, bitsVertical);
+            labelVariableHorizontal.text = VariableExpression.logicVariableAlphabet.Substring(bitsVertical, bitsHorizontal);
         }
-        else if (Main.Instance.inputLength >= 1 && Main.Instance.inputLength <= ParseExpression.logicVariableAlphabet.Length) {
-            labelVariableHorizontal.text = ParseExpression.logicVariableAlphabet.Substring(0, Main.Instance.inputLength);
+        else if (Main.Instance.inputLength >= 1 && Main.Instance.inputLength <= VariableExpression.logicVariableAlphabet.Length) {
+            labelVariableHorizontal.text = VariableExpression.logicVariableAlphabet.Substring(0, Main.Instance.inputLength);
             labelVariableVertical.text = "";
         }
     }

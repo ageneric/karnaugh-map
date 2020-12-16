@@ -3,7 +3,7 @@ using System.Text;
 using UnityEngine;
 using KMapLoop = System.Collections.Generic.List<System.Collections.Generic.List<bool>>;
 
-public static class CollectionHelper
+public static class KMapLogging
 {
     public static void LogLoopList(string message, List<KMapLoop> loopList) {
         StringBuilder debugText = new StringBuilder();

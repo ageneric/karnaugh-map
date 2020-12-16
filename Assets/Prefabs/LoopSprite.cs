@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using KMapLoop = System.Collections.Generic.List<System.Collections.Generic.List<bool>>;
 
-public class LoopAroundSprite : MonoBehaviour
+public class LoopSprite : MonoBehaviour
 {
     // Displays a single k-map loop which encircles the indexes it includes.
 
@@ -72,7 +72,8 @@ public class LoopAroundSprite : MonoBehaviour
     }
 
     public int PositionRangeInAxis(KMapLoop loop, int[] checkBits, out int maximum, out int numCellsInAxis) {
-        // Get the leftmost and rightmost position, or upmost and downmost position.
+        // Get the leftmost and rightmost position, or upmost and downmost position, 
+        // that this loop contains. Specify the bits to check against in checkBits.
         KMapLoop singleAxisLoop = new KMapLoop();
         foreach (int bit in checkBits) {
             singleAxisLoop.Add(loop[bit]);
@@ -99,15 +100,6 @@ public class LoopAroundSprite : MonoBehaviour
         // Column offset -ve: Increasing indexes appear top-to-bottom, i.e. decreasing y.
         rectTransform.position = new Vector3(offsetWidth, -offsetHeight) * positionScale + offset.position;
         rectTransform.sizeDelta = new Vector2(scaleWidth, scaleHeight) * positionScale;
-
-        float shrinkWidth = 0f;
-        float shrinkHeight = 0f;
-        if (scaleWidth == 2)
-            shrinkWidth = 0.2f;
-        if (scaleHeight == 2)
-            shrinkHeight = 0.2f;
-        rectTransform.position -= new Vector3(shrinkWidth, -shrinkHeight);
-        rectTransform.sizeDelta -= new Vector2(shrinkWidth, -shrinkHeight);
     }
 
     public void ColorSprite(float hue) {

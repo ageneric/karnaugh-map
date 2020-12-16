@@ -9,6 +9,20 @@ public static class BinaryHelper
         return 1 << exponent;
     }
 
+    public static bool BitIsSet(int value, int index) {
+        int maskedBinary = value & (1 << index);
+        return maskedBinary != 0;
+    }
+
+    public static int CountBitsSet(bool[] bits) {
+        int trueBitsCount = 0;
+        for (int i = 0; i < bits.Length; i++) {
+            if (bits[i])
+                trueBitsCount++;
+        }
+        return trueBitsCount;
+    }
+
     public static int GrayCode(int index) {
         switch (index) {
             case 0:
@@ -53,14 +67,8 @@ public static class BinaryHelper
                 secondaryDiagonalList.Add(ExtendedGrayCode(i));
             }
         }
-
         primaryDiagonalList.AddRange(secondaryDiagonalList);
         return primaryDiagonalList;
-    }
-
-    public static bool BitIsSet(int value, int index) {
-        int maskedBinary = value & (1 << index);
-        return maskedBinary != 0;
     }
 
     public static bool[] BinaryValueToBoolean(int value, int length) {
@@ -79,13 +87,13 @@ public static class BinaryHelper
     }
 
     public static int BooleanToBinaryValue(bool[] bits) {
-        int totalBinary = 0;
+        int totalValue = 0;
         Array.Reverse(bits);
-        
+
         for (int i = 0; i < bits.Length; i++) {
             if (bits[i])
-                totalBinary += PowBaseTwo(i);
+                totalValue += PowBaseTwo(i);
         }
-        return totalBinary;
+        return totalValue;
     }
 }

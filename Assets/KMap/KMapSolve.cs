@@ -25,7 +25,7 @@ public static class KMapSolve
                 // For each bit that is set, form a loop containing it, and expand to find maximal loops.
                 KMapLoop startLoop = SeedLoop(gridIndex);
                 // For optimisation, essential single/double loops are detected as they are made.
-                if (SingleCellConnectionCount(gridIndex) <= 1) {
+                if (CountAdjacentCellsSet(gridIndex) <= 1) {
                     ExpandLoop(startLoop, true, gridIndex, cellsVisited);
                 }
                 else {
@@ -36,8 +36,8 @@ public static class KMapSolve
             }
         }
         // Log loop state for debugging.
-        CollectionHelper.LogLoopList("Essential loops", Main.Instance.loops);
-        CollectionHelper.LogLoopList("Other maximsed loops", workingLoops);
+        KMapLogging.LogLoopList("Essential loops", Main.Instance.loops);
+        KMapLogging.LogLoopList("Other maximsed loops", workingLoops);
 
         SimplifyWorkingList.Simplify(workingLoops);
     }
@@ -52,7 +52,7 @@ public static class KMapSolve
         return loop;
     }
 
-    public static int SingleCellConnectionCount(int startIndex) {
+    public static int CountAdjacentCellsSet(int startIndex) {
         int connectionCount = 0;
 
         // For each flippable bit (neighbouring cell).

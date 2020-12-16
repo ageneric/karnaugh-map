@@ -52,9 +52,9 @@ public static class KMapExtensionMethods
         for (int i = 0; i < loop.Count; i++) {
             if (loop[i].Count == 1) {
                 if (loop[i][0])
-                    loopStrings.Add(ParseExpression.logicVariableAlphabet[i].ToString());
+                    loopStrings.Add(VariableExpression.logicVariableAlphabet[i].ToString());
                 else
-                    loopStrings.Add("¬" + ParseExpression.logicVariableAlphabet[i]);
+                    loopStrings.Add("¬" + VariableExpression.logicVariableAlphabet[i]);
             }
         }
 

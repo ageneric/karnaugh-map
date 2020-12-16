@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ToggleBit : MonoBehaviour
+public class BinaryToggle : MonoBehaviour
 {
     // Represents a single binary bit in the k-map's grid state.
 

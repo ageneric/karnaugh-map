@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class ParseExpression
+public static class VariableExpression
 {
     // Alphabet for input bit names (doesn't include I, Q).
     public static string logicVariableAlphabet = "ABCDEFGHJKLMNOPRSTUVWXYZ";
@@ -15,26 +15,6 @@ public static class ParseExpression
                 return i + 1;
         }
         return 0;
-    }
-
-    public static bool[] GenerateTruthTable(string expression) {
-        int variableCount = VariableCount(expression);
-        Debug.Log("Generated an expression with " + variableCount.ToString() + " variables.");
-        bool[] truthTable = new bool[BinaryHelper.PowBaseTwo(variableCount)];
-        if (variableCount >= 2)
-            Main.Instance.UpdateInputLength(variableCount);
-
-        // Iterate through each row / combination of the binary truth table.
-        for (int i = 0; i < BinaryHelper.PowBaseTwo(variableCount); i++) {
-            
-            bool outcome = GenerateTruthValue(expression,
-                BinaryHelper.BinaryValueToBoolean(i, variableCount));
-            truthTable[i] = outcome;
-
-            if (variableCount >= 2)
-                Main.Instance.gridState[i] = outcome;
-        }
-        return truthTable;
     }
 
     public static bool GenerateTruthValue(string expression, bool[] truthTableBits) {

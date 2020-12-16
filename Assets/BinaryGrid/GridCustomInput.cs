@@ -3,26 +3,21 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class InputCustomSet : MonoBehaviour
+public class GridCustomInput : MonoBehaviour
 {
     public InputField input;
     public Text infoText;
     public GridScene sceneManager;
 
-    private void Start() {
-        int bitsSet = 0;
-        foreach (bool state in Main.Instance.gridState) {
-            if (state) bitsSet++;
-        }
-        infoText.text = "total " + bitsSet.ToString();
+    void Start() {
+        infoText.text = BinaryHelper.CountBitsSet(Main.Instance.gridState).ToString() + " bits set";
     }
 
     public void UpdateBitsWithInput() {
         sceneManager.UpdateInput();
         Main.Instance.gridState = new bool[Main.Instance.GridSize];
 
-        string inputString = input.text;
-        string inputCSV = Regex.Replace(inputString, @"\s+", "");
+        string inputCSV = Regex.Replace(input.text, @"\s+", "");
         string[] cellIndexes = inputCSV.Split(';', ',');
 
         foreach (string cellIndex in cellIndexes) {
@@ -39,6 +34,6 @@ public class InputCustomSet : MonoBehaviour
                 return;
             }
         }
-        infoText.text = "total " + cellIndexes.Length.ToString();
+        infoText.text = cellIndexes.Length.ToString() + " bits set";
     }
 }
