@@ -18,11 +18,6 @@ public class DisplayLoopSolution : MonoBehaviour
     public float textTintIntensity;
     private Coroutine drawLoopRoutine;
 
-    void Start() {
-        if (Main.Instance.loops.Count == 0)
-            Draw();
-    }
-
     public void Clear() {
         foreach (GameObject loop in displayedLoops)
             Destroy(loop);

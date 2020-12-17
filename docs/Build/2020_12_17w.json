@@ -1,0 +1,16 @@
+{
+"companyName": "ageneric",
+"productName": "KMap Digital Logic",
+"productVersion": "release",
+"dataUrl": "2020_12_17w.data.unityweb",
+"wasmCodeUrl": "2020_12_17w.wasm.code.unityweb",
+"wasmFrameworkUrl": "2020_12_17w.wasm.framework.unityweb",
+"graphicsAPI": ["WebGL 2.0","WebGL 1.0"],
+"webglContextAttributes": {"preserveDrawingBuffer": false},
+"splashScreenStyle": "Light",
+"backgroundColor": "#E5DBE5",
+"cacheControl": {"default": "must-revalidate"},
+"developmentBuild": false,
+"multithreading": false,
+"unityVersion": "2019.4.3f1"
+}

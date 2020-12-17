@@ -16,10 +16,17 @@ public class GridScene : MonoBehaviour
     void Start() {
         StartCoroutine(WaitForGridUpdateLabels());
 
-        if (Main.Instance.inputLength <= 4)
+        if (BinaryHelper.CountBitsSet(Main.Instance.gridState) > 0 && Main.Instance.loops.Count == 0)
+            KMapSolve.Solve();
+
+        if (Main.Instance.inputLength <= 4) {
             customLengthInput.SetActive(false);
-        else
+            loopSpriteOverlay.Draw();
+        }
+        else {
             customLengthInput.SetActive(true);
+            loopSpriteOverlay.TextDraw();
+        }
     }
 
     public IEnumerator WaitForGridUpdateLabels() {
