@@ -36,8 +36,9 @@ public class GridScene : MonoBehaviour
 
     public void UpdateInputLength(int newInputLength) {
         Main.Instance.UpdateInputLength(newInputLength);
-        loopSpriteOverlay.Clear();
         grid.ResetGrid();
+        loopSpriteOverlay.Clear();
+        customLengthInput.GetComponent<GridCustomInput>().DisplayBitCount();
         UpdateLabels();
 
         if (newInputLength <= 4)

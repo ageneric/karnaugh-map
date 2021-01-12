@@ -7,16 +7,18 @@ using UnityEngine.UI;
 public class TruthTableScene : MonoBehaviour
 {
     public InputField input;
-    public Text outputText;
+    public Text outputDetail;
     public Text labelVariableNames;
+    [Space]
     public GameObject outputTable;
     public int itemsPerColumn;
-    public Transform[] tableColumnOffsets;
+    public RectTransform[] tableColumnOffsets;
     public GameObject baseTableEntry;
     private List<GameObject> displayedEntries = new List<GameObject>();
 
     void Start()
     {
+        input.text = Main.Instance.inputExpression;
         ClearExpression();
         UpdateTruthTable();
     }
@@ -35,14 +37,14 @@ public class TruthTableScene : MonoBehaviour
             tableEntry.PositionInTable(i % itemsPerColumn);
         }
         int bitsSet = BinaryHelper.CountBitsSet(Main.Instance.gridState);
-        outputText.text = $"{bitsSet} / {Main.Instance.GridSize} truthy bits";
+        outputDetail.text = $"{bitsSet} / {Main.Instance.GridSize} truthy bits";
     }
 
     public void ClearExpression() {
         foreach (GameObject entry in displayedEntries)
             Destroy(entry);
         displayedEntries = new List<GameObject>();
-        outputText.text = "";
+        outputDetail.text = "";
         labelVariableNames.text = "";
     }
 
@@ -51,12 +53,13 @@ public class TruthTableScene : MonoBehaviour
 
         try {
             GenerateTruthTable(input.text);
+            Main.Instance.inputExpression = input.text;
         }
         catch (BooleanExpressionEngine.SyntaxException ex) {
-            outputText.text = "Syntax invalid: " + ex.Message;
+            outputDetail.text = "Syntax invalid: " + ex.Message;
         }
         catch (InvalidDataException ex) {
-            outputText.text = ex.Message;
+            outputDetail.text = ex.Message;
         }
     }
 
@@ -72,8 +75,9 @@ public class TruthTableScene : MonoBehaviour
             displayResult.PositionInTable(0);
         }
         else {
-            if (variableCount >= 2)
+            if (variableCount >= 2) {
                 Main.Instance.UpdateInputLength(variableCount);
+            }
 
             labelVariableNames.text = "Table for " + variableCount + " variable(s) "
                 + VariableExpression.logicVariableAlphabet.Substring(0, variableCount);
@@ -93,7 +97,7 @@ public class TruthTableScene : MonoBehaviour
                 if (variableCount >= 2)
                     Main.Instance.gridState[i] = outcome;
             }
-            outputText.text = $"{bitsSet} / {BinaryHelper.PowBaseTwo(variableCount)} truthy bits";
+            outputDetail.text = $"{bitsSet} / {BinaryHelper.PowBaseTwo(variableCount)} truthy bits";
         }
     }
 

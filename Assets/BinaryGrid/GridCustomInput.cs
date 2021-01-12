@@ -10,6 +10,10 @@ public class GridCustomInput : MonoBehaviour
     public GridScene sceneManager;
 
     void Start() {
+        DisplayBitCount();
+    }
+
+    public void DisplayBitCount() {
         infoText.text = BinaryHelper.CountBitsSet(Main.Instance.gridState).ToString() + " bits set";
     }
 
@@ -23,14 +27,17 @@ public class GridCustomInput : MonoBehaviour
         foreach (string cellIndex in cellIndexes) {
             try {
                 int gridIndex = Int32.Parse(cellIndex);
-                Main.Instance.gridState[gridIndex] = true;
+
+                if (gridIndex >= 0 && gridIndex < Main.Instance.GridSize) {
+                    Main.Instance.gridState[gridIndex] = true;
+                }
+                else {
+                    infoText.text = "index out of range (use 0-31)";
+                    return;
+                }
             }
             catch (FormatException) {
                 infoText.text = "invalid format";
-                return;
-            }
-            catch (IndexOutOfRangeException) {
-                infoText.text = "index out of range (use 0-31)";
                 return;
             }
         }

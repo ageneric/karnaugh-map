@@ -10,7 +10,7 @@ public class DisplayLoopSolution : MonoBehaviour
     // Display the solution loops above the grid & update the sum-of-products text.
 
     public GameObject overlayGroup;
-    public Transform overlayStartOffset;
+    public RectTransform overlayStartOffset;
     public GameObject baseLoopSprite;
     private List<GameObject> displayedLoops = new List<GameObject>();
     [Space]

@@ -7,7 +7,7 @@ public class BinaryToggle : MonoBehaviour
     // Represents a single binary bit in the k-map's grid state.
 
     [EditorReadOnly] public int index;
-    [EditorReadOnly] public Transform offset;
+    [EditorReadOnly] public RectTransform offset;
     public float positionScale;
     public Text label;
     public Toggle toggle;
@@ -40,6 +40,7 @@ public class BinaryToggle : MonoBehaviour
         int column = BinaryHelper.GrayCode(trueColumn);
 
         // Column offset -ve: Increasing indexes appear top-to-bottom, i.e. decreasing y.
-        transform.position = new Vector3(row, -column)*positionScale + offset.position;
+        Vector2 gridPosition = new Vector2(row, -column) * positionScale;
+        gameObject.GetComponent<RectTransform>().anchoredPosition = gridPosition + offset.anchoredPosition;
     }
 }

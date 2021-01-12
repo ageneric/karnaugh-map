@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class TableEntry : MonoBehaviour
 {
-    [EditorReadOnly] public Transform offset;
+    [EditorReadOnly] public RectTransform offset;
     public Text[] variableBitLabels;
     public Text resultText;
     public int entrySpacing;
@@ -45,6 +45,7 @@ public class TableEntry : MonoBehaviour
 
     public void PositionInTable(int row) {
         // Column offset -ve: Increasing indexes appear top-to-bottom, i.e. decreasing y.
-        transform.position = new Vector3(0f, -row) * entrySpacing + offset.position;
+        Vector2 tablePosition = new Vector3(0f, -row) * entrySpacing;
+        gameObject.GetComponent<RectTransform>().anchoredPosition = tablePosition + offset.anchoredPosition;
     }
 }

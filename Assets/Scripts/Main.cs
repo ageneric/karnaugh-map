@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using KMapLoop = System.Collections.Generic.List<System.Collections.Generic.List<bool>>;
 
@@ -21,6 +20,9 @@ public class Main : MonoBehaviour
     public List<KMapLoop> loops;
     // For example; [{0}, {0, 1}, {1}] is the loop that contains both {001} and {011}.
 
+    // The original expression entered by the user (using the input field).
+    public string inputExpression;
+
     [RuntimeInitializeOnLoadMethod]
     public void Awake() {
         if (Instance is null) {
@@ -36,6 +38,7 @@ public class Main : MonoBehaviour
         inputLength = newInputLength;
         gridState = new bool[GridSize];
         loops = new List<KMapLoop>();
+        inputExpression = "";
     }
 
     public void ClearLoops() {

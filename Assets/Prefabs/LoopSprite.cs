@@ -9,7 +9,7 @@ public class LoopSprite : MonoBehaviour
 {
     // Displays a single k-map loop which encircles the indexes it includes.
 
-    [EditorReadOnly] public Transform offset;
+    [EditorReadOnly] public RectTransform offset;
     public float positionScale;
     public Image loopImage;
     private float colorSaturation;
@@ -98,7 +98,7 @@ public class LoopSprite : MonoBehaviour
         RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
 
         // Column offset -ve: Increasing indexes appear top-to-bottom, i.e. decreasing y.
-        rectTransform.position = new Vector3(offsetWidth, -offsetHeight) * positionScale + offset.position;
+        rectTransform.anchoredPosition = new Vector2(offsetWidth, -offsetHeight) * positionScale + offset.anchoredPosition;
         rectTransform.sizeDelta = new Vector2(scaleWidth, scaleHeight) * positionScale;
     }
 

@@ -7,11 +7,12 @@ public class BinaryGrid : MonoBehaviour
     [EditorReadOnly] public int gridWidth;
     [EditorReadOnly] public int gridHeight;
 
-    public GameObject[] poolToggleButtons;
-    public GameObject toggleBitButton;
-    public List<GameObject> gridToggleButtons;
+    private GameObject[] poolToggleButtons;
     public GameObject gridGroup;
-    public Transform gridStartOffset;
+    public RectTransform gridStartOffset;
+    public GameObject toggleBitButton;
+    private List<GameObject> displayedToggleButtons;
+    [Space]
     public GridScene sceneManager;
 
     void Start()
@@ -21,6 +22,8 @@ public class BinaryGrid : MonoBehaviour
     }
 
     public void StartInitialiseGrid() {
+        displayedToggleButtons = new List<GameObject>();
+
         // Generate 16 buttons and add to the pool of available button objects.
         for (int i = 0; i<16; i++) {
             GameObject toggleButton = Instantiate(toggleBitButton, Vector3.zero, Quaternion.identity,
@@ -29,10 +32,10 @@ public class BinaryGrid : MonoBehaviour
             toggleBit.index = i;
             toggleBit.offset = gridStartOffset;
             toggleBit.sceneManager = sceneManager;
-            gridToggleButtons.Add(toggleButton);
+            displayedToggleButtons.Add(toggleButton);
         }
 
-        poolToggleButtons = gridToggleButtons.ToArray();
+        poolToggleButtons = displayedToggleButtons.ToArray();
     }
 
     public void ResetGrid() {
@@ -53,7 +56,7 @@ public class BinaryGrid : MonoBehaviour
         }
 
         // Enable and reset only the needed buttons. Deactivate unused buttons.
-        gridToggleButtons = new List<GameObject>();
+        displayedToggleButtons = new List<GameObject>();
         foreach (GameObject toggleButton in poolToggleButtons) {
             BinaryToggle toggleBit = toggleButton.GetComponent<BinaryToggle>();
 
@@ -61,7 +64,7 @@ public class BinaryGrid : MonoBehaviour
                 toggleBit.Reset();
                 toggleBit.PositionInGrid(gridWidth);
                 toggleButton.SetActive(true);
-                gridToggleButtons.Add(toggleButton);
+                displayedToggleButtons.Add(toggleButton);
             }
             else {
                 toggleButton.SetActive(false);
